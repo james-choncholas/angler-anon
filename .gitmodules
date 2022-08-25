@@ -1,0 +1,15 @@
+[submodule "emp-ag2pc"]
+	path = emp-ag2pc
+	url = https://github.com/emp-toolkit/emp-ag2pc.git
+[submodule "emp-agmpc"]
+	path = emp-agmpc
+	url = https://github.com/akridex/emp-agmpc.git
+[submodule "emp-ot"]
+	path = emp-ot
+	url = https://github.com/akridex/emp-ot.git
+[submodule "emp-sh2pc"]
+	path = emp-sh2pc
+	url = https://github.com/emp-toolkit/emp-sh2pc.git
+[submodule "emp-tool"]
+	path = emp-tool
+	url = https://github.com/emp-toolkit/emp-tool.git

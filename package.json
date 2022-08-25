@@ -1,0 +1,34 @@
+{
+  "name": "akridex-discovery",
+  "version": "1.0.16",
+  "description": "Discovery for multiparty resource allocation.",
+  "author": {
+    "name": "James Choncholas",
+    "email": "jchoncholas3@gatech.edu",
+    "url": "https://james.choncholas.com"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@kubernetes/client-node": "^0.13.0",
+    "bittorrent-dht": "^10.0.0",
+    "bittorrent-tracker": "^9.15.0",
+    "colors": "^1.4.0",
+    "expr-eval": "^2.0.2",
+    "express": "^4.17.1",
+    "external-ip": "^2.3.1",
+    "hashmap": "^2.4.0",
+    "ip": "^1.1.5",
+    "moment": "^2.27.0",
+    "openssl-nodejs": "^1.0.5",
+    "request": "^2.88.2",
+    "tcp-ping": "^0.1.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "todo"
+  },
+  "license": "ISC"
+}

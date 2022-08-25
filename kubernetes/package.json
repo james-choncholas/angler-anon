@@ -1,0 +1,26 @@
+{
+  "name": "akridex-operator",
+  "version": "1.0.0",
+  "description": "Kubernetes operator for AkriDEX",
+  "author": {
+    "name": "James Choncholas",
+    "email": "jchoncholas3@gatech.edu",
+    "url": "https://james.choncholas.com"
+  },
+  "main": "operator.js",
+  "dependencies": {
+    "@kubernetes/client-node": "^0.13.2",
+    "akridex-discovery": "^1.0.16",
+    "bittorrent-dht": "^10.0.0",
+    "hashmap": "^2.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "akridex.com"
+  },
+  "license": "ISC"
+}

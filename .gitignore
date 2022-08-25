@@ -1,0 +1,6 @@
+node_modules/
+Session.vim
+openssl/
+mpcbin/ipaddrs.txt
+mpcbin/output*.txt
+results/*.pdf

@@ -1,0 +1,12 @@
+apiVersion: stable.akridex.com/v1
+kind: MarketUnit
+metadata:
+  name: my-new-rentable-market-unit
+spec:
+  cpu: 200m
+  memory: 128Mi
+  location: dn5bpsbw
+  secretQuantity: 5
+  secretPriceFunc: "(2*(q-r))+2"
+  # q=total quantity, r=quantity remaining
+  # see https://github.com/silentmatt/expr-eval
