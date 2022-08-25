@@ -3,4 +3,5 @@ Session.vim
 openssl/
 mpcbin/ipaddrs.txt
 mpcbin/output*.txt
-results/*.pdf
+build
+.cache

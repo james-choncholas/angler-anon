@@ -1,19 +1,28 @@
-# DEV REPO NOTE
-**WARNING**
-This repo is for akridex-discovery-dev but but be named akridex-discovery for compatibility with hardcoded paths in scripts
-
-This repo uses git lfs
-
-
-
-
 # Getting Started
+Initialize submodules: `git submodule update --init --recursive`
+
 The easiest way to run AkriDEX is via docker.
 In each directory (`akridex-mpc`, `akridex-operator`, and `akridex-discovery`)
 run the `docker/build.sh` script to build the containers.
 
 To run a simple resource discovery experiment with 9 resource providers and 1 customer,
 run `akridex-discovery/docker/run.sh`
+
+# Running on Host
+```
+npm install -g cmake-js
+npm run deps
+npm run libs
+npm run compile
+```
+
+To change cmake flags
+```
+npm config set cmake_USE_RANDOM_DEVICE=OFF
+npm config edit
+```
+
+
 
 
 # Public DHT bootstrap node setup
