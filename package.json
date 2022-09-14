@@ -9,8 +9,8 @@
   },
   "main": "index.js",
   "dependencies": {
-    "bindings": "~1.2.1",
-    "@kubernetes/client-node": "^0.13.0",
+    "bindings": "^1.5.0",
+    "@kubernetes/client-node": "^0.17.1",
     "bittorrent-dht": "^10.0.0",
     "bittorrent-tracker": "^9.15.0",
     "colors": "^1.4.0",
@@ -23,13 +23,14 @@
     "openssl-nodejs": "^1.0.5",
     "request": "^2.88.2",
     "tcp-ping": "^0.1.1",
-    "node-addon-api": "^1.0.0"
+    "node-addon-api": "^5.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "deps": "./scripts/install_deps.sh",
     "libs": "./scripts/build_libs.sh",
     "compile": "cmake-js compile -- -j8",
+    "clean": "cmake-js clean",
     "debug": "cmake-js compile -D -- -j8"
   },
   "repository": {

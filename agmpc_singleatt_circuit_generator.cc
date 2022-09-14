@@ -7,10 +7,6 @@
 
 #include <iostream>
 
-#include <libgen.h>         // dirname
-#include <unistd.h>         // readlink
-#include <linux/limits.h>   // PATH_MAX
-
 using namespace emp;
 using namespace std;
 
@@ -27,18 +23,9 @@ int main(int argc, char** argv) {
     if (max_num_parties < 3)
         error("Requires at least 3 parties\n");
 
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    const char *path;
-    if (count != -1) {
-        path = dirname(result);
-    } else {
-        error("cant find path\n");
-        return 1;
-    }
-
     for (int num_parties = 3; num_parties <= max_num_parties; ++num_parties) {
-      std::string circuitPath = string(path) + "/agmpc_singleatt_" + to_string(num_parties) + "_circuit.txt";
+      std::string circuitDir = CIRCUIT_DIR;
+      std::string circuitPath = circuitDir + "/agmpc_singleatt_" + to_string(num_parties) + "_circuit.txt";
 
       emp::setup_plain_prot(true, circuitPath.c_str());
 

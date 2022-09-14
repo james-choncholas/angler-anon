@@ -2,10 +2,7 @@
 
 #include <iostream>
 
-#include <libgen.h>         // dirname
-#include <unistd.h>         // readlink
-#include <linux/limits.h>   // PATH_MAX
-#include <sys/stat.h>       // stat
+#include <sys/stat.h>
 
 #include <jlog.h>
 #include <emp-agmpc/emp-agmpc.h>
@@ -148,16 +145,8 @@ std::optional<AuctionResult>
 agmpc_singleatt_auction(const std::vector<IpPort> &ip_list, int party_index, int bid) {
   const int nP = ip_list.size();
 
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    const char *path;
-    if (count != -1) {
-        path = dirname(result);
-    } else {
-        error("cant find my own path\n");
-        return {};
-    }
-    std::string circuitPath = string(path) + "/agmpc_singleatt_" + to_string(nP) + "_circuit.txt";
+    std::string circuitDir = CIRCUIT_DIR;
+    std::string circuitPath = circuitDir + "/agmpc_singleatt_" + to_string(nP) + "_circuit.txt";
 
     ThreadPool pool(2*(nP-1)+2);
     NetIOMP io(ip_list, party_index, &pool);

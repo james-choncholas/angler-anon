@@ -49,6 +49,8 @@ file(GLOB AGMPC_SINGLEATT_SOURCES
     "agmpc_singleatt_auction.cc"
     "agmpc_singleatt_auction.h")
 
+add_definitions(-DCIRCUIT_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+
 # Include Node-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -71,7 +73,7 @@ add_library(agmpc_singleatt_auction_napi SHARED
   ${CMAKE_JS_SRC})
 target_include_directories(agmpc_singleatt_auction_napi PUBLIC ${CMAKE_JS_INC} ${NODE_ADDON_API_DIR})
 set_target_properties(agmpc_singleatt_auction_napi PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(agmpc_singleatt_auction_napi ${CMAKE_JS_LIB})
+target_link_libraries(agmpc_singleatt_auction_napi ${CMAKE_JS_LIB} agmpc_singleatt_auction)
 
 # AGMPC single attribute executable
 add_executable(agmpc_singleatt_auction_main "agmpc_singleatt_auction_main.cc")
