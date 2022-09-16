@@ -46,8 +46,8 @@ set(EMP_INCLUDE_DIRS
   ${GMP_INCLUDE_DIR})
 
 file(GLOB AGMPC_SINGLEATT_SOURCES
-    "agmpc_singleatt_auction.cc"
-    "agmpc_singleatt_auction.h")
+    "src/mpc_addon/agmpc_singleatt_auction.cc"
+    "src/mpc_addon/agmpc_singleatt_auction.h")
 
 add_definitions(-DCIRCUIT_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
@@ -65,25 +65,25 @@ add_definitions(-DNAPI_VERSION=3)
 # AGMPC single attribute lib
 add_library(agmpc_singleatt_auction SHARED ${AGMPC_SINGLEATT_SOURCES})
 target_link_libraries(agmpc_singleatt_auction ${EMP-TOOL_LIBRARIES})
-target_include_directories(agmpc_singleatt_auction PUBLIC ${EMP_INCLUDE_DIRS})
+target_include_directories(agmpc_singleatt_auction PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")
 
 # AGMPC lib napi binding
 add_library(agmpc_singleatt_auction_napi SHARED
-  "agmpc_singleatt_auction_napi.cc"
+  "src/mpc_addon/agmpc_singleatt_auction_napi.cc"
   ${CMAKE_JS_SRC})
-target_include_directories(agmpc_singleatt_auction_napi PUBLIC ${CMAKE_JS_INC} ${NODE_ADDON_API_DIR})
+target_include_directories(agmpc_singleatt_auction_napi PUBLIC ${CMAKE_JS_INC} ${NODE_ADDON_API_DIR} "src/mpc_addon")
 set_target_properties(agmpc_singleatt_auction_napi PROPERTIES PREFIX "" SUFFIX ".node")
 target_link_libraries(agmpc_singleatt_auction_napi ${CMAKE_JS_LIB} agmpc_singleatt_auction)
 
 # AGMPC single attribute executable
-add_executable(agmpc_singleatt_auction_main "agmpc_singleatt_auction_main.cc")
+add_executable(agmpc_singleatt_auction_main "src/mpc_addon/agmpc_singleatt_auction_main.cc")
 target_link_libraries(agmpc_singleatt_auction_main agmpc_singleatt_auction)
-target_include_directories(agmpc_singleatt_auction_main PUBLIC)
+target_include_directories(agmpc_singleatt_auction_main PUBLIC "src/mpc_addon")
 
 # AGMPC single attribute circuit generation
-add_executable(agmpc_singleatt_circuit_generator agmpc_singleatt_circuit_generator.cc)
+add_executable(agmpc_singleatt_circuit_generator "src/mpc_addon/agmpc_singleatt_circuit_generator.cc")
 target_link_libraries(agmpc_singleatt_circuit_generator ${EMP-TOOL_LIBRARIES})
-target_include_directories(agmpc_singleatt_circuit_generator PUBLIC ${EMP_INCLUDE_DIRS})
+target_include_directories(agmpc_singleatt_circuit_generator PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")
 
 add_custom_target(agmpc_generate_circuits
   ./agmpc_singleatt_circuit_generator 10
