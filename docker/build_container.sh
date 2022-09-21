@@ -4,7 +4,5 @@ cd $scriptpath/..
 
 sudo docker build \
     -f docker/Dockerfile \
-    -t reg.choncholas.com/research/dex/akridex:latest \
+    -t akridex:latest \
     .
-
-sudo docker push reg.choncholas.com/research/dex/akridex:latest
