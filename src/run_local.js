@@ -36,8 +36,15 @@ async function run() {
 
 if (workerData) {
   const party = parseInt(workerData[0]);
-  const bid = parseInt(workerData[1]);
-  const capacity = bid*2;
+  var bid;
+  var capacity;
+  if (party == 1) {
+    bid = 0;
+    capacity = 10;
+  } else {
+    bid = parseInt(workerData[1]);
+    capacity = bid*2;
+  }
   const res = binding.agmpc_matcher_napi(ips, ports, party, capacity, bid, 0);
   parentPort.postMessage(res);
 } else {

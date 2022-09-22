@@ -12,7 +12,7 @@ using namespace std;
 
 #define APP_DEBUG 0
 
-static const int ALICE_NUM_WIRES = 3*32;
+static const int ALICE_NUM_WIRES = 5*32;
 static const int BOB_NUM_WIRES_EACH = 2*32;
 
 static const string outputDir = "/tmp/";

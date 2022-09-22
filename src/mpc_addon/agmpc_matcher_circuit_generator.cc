@@ -96,12 +96,12 @@ int main(int argc, char** argv) {
         Bit is_under_capacity = request_sz < db[p].capacity;
         Bit is_min_price = db[p].price < globalMinCost;
         Bit best_choice = is_under_capacity & is_min_price;
-        globalMinCost = globalMinCost.If(best_choice, db[p].price);
         globalMinIndex = globalMinIndex.If(best_choice, curIndex);
+        globalMinCost = globalMinCost.If(best_choice, db[p].price);
         curIndex = curIndex + one;
       }
-      globalMinCost.reveal<int>();
       globalMinIndex.reveal<int>();
+      globalMinCost.reveal<int>();
 
 
       //// First price auction for each unit in request
