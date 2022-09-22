@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: default
+  name: akridex-sa
+
+---
+# RBAC
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: akridex-role
+
+rules:
+  # Allow creating CRDs
+  #- apiGroups:
+  #    - apiextensions.k8s.io
+  #  resources:
+  #    - customresourcedefinitions
+  #  verbs: ["*"]
+
+  - apiGroups:
+    - stable.akridex.com
+    resources: ["*"]
+    #- marketunit
+    verbs:
+    - get
+    - list
+    - watch
+
+  - apiGroups:
+    - "" #k8s.CoreV1Api
+    resources:
+    - namespaces
+    verbs:
+    - get
+    - create
+    - delete
+
+  - apiGroups:
+    - certificates.k8s.io #k8s.CertificatesV1beta1Api
+    resources:
+    - certificatesigningrequests
+    verbs:
+    - create
+    - get
+
+  - apiGroups:
+    - certificates.k8s.io
+    resources:
+    - signers
+    resourceNames:
+        #- example.com/my-signer-name # example.com/* can be used to authorize for all signers in the 'example.com' domain
+    - kubernetes.io/kube-apiserver-client
+    #- kubernetes.io/legacy-unknown
+    verbs:
+    - approve
+
+  - apiGroups:
+    - certificates.k8s.io
+    resources:
+    - certificatesigningrequests/status
+    - certificatesigningrequests/approval
+    verbs:
+    - update
+    - get
+
+  - apiGroups:
+    - networking.k8s.io #k8s.NetworkingV1Api
+    - rbac.authorization.k8s.io #k8s.RbacAuthorizationV1Api
+    - "" #k8s.CoreV1Api
+    resources:
+    - networkpolicies #NamespacedNetworkPolicy
+    - roles #NamespacedRole
+    - rolebindings #NamespacedRoleBinding
+    - resourcequotas #NamespacedResourceQuota
+    verbs:
+    - create
+    #- delete
+
+  # To give the following permissions, akridex must itself have them
+  - apiGroups:
+    - ""
+    - apps
+    - extensions
+    resources:
+    - deployments
+    - pods
+    - replicasets
+    verbs:
+    - "*"
+
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: akridex-role-binding
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: akridex-role
+subjects:
+  - kind: ServiceAccount
+    name: akridex-sa
+    namespace: default
+
