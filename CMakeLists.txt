@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.10)
-#project (akridex-mpc)
-project (agmpc_singleatt_auction)
-set(NAME "akridex-mpc")
+project (agmpc_matcher)
+set(NAME "agmpc_matcher")
 
 cmake_policy(SET CMP0042 NEW)
 set (CMAKE_CXX_STANDARD 17)
@@ -46,8 +45,8 @@ set(EMP_INCLUDE_DIRS
   ${GMP_INCLUDE_DIR})
 
 file(GLOB AGMPC_SINGLEATT_SOURCES
-    "src/mpc_addon/agmpc_singleatt_auction.cc"
-    "src/mpc_addon/agmpc_singleatt_auction.h")
+    "src/mpc_addon/agmpc_matcher.cc"
+    "src/mpc_addon/agmpc_matcher.h")
 
 add_definitions(-DCIRCUIT_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
@@ -58,38 +57,38 @@ execute_process(COMMAND node -p "require('node-addon-api').include"
         )
 string(REGEX REPLACE "[\r\n\"]" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 message(STATUS "NODE_ADDON_API_DIR is ${NODE_ADDON_API_DIR}")
-#target_include_directories(agmpc_singleatt_auction PRIVATE ${NODE_ADDON_API_DIR})
+#target_include_directories(agmpc_matcher PRIVATE ${NODE_ADDON_API_DIR})
 add_definitions(-DNAPI_VERSION=3)
 #include_directories(${CMAKE_JS_INC} "${NODE_ADDON_API_DIR}")
 
 # AGMPC single attribute lib
-add_library(agmpc_singleatt_auction SHARED ${AGMPC_SINGLEATT_SOURCES})
-target_link_libraries(agmpc_singleatt_auction ${EMP-TOOL_LIBRARIES})
-target_include_directories(agmpc_singleatt_auction PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")
+add_library(agmpc_matcher SHARED ${AGMPC_SINGLEATT_SOURCES})
+target_link_libraries(agmpc_matcher ${EMP-TOOL_LIBRARIES})
+target_include_directories(agmpc_matcher PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")
 
 # AGMPC lib napi binding
-add_library(agmpc_singleatt_auction_napi SHARED
-  "src/mpc_addon/agmpc_singleatt_auction_napi.cc"
+add_library(agmpc_matcher_napi SHARED
+  "src/mpc_addon/agmpc_matcher_napi.cc"
   ${CMAKE_JS_SRC})
-target_include_directories(agmpc_singleatt_auction_napi PUBLIC ${CMAKE_JS_INC} ${NODE_ADDON_API_DIR} "src/mpc_addon")
-set_target_properties(agmpc_singleatt_auction_napi PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(agmpc_singleatt_auction_napi ${CMAKE_JS_LIB} agmpc_singleatt_auction)
+target_include_directories(agmpc_matcher_napi PUBLIC ${CMAKE_JS_INC} ${NODE_ADDON_API_DIR} "src/mpc_addon")
+set_target_properties(agmpc_matcher_napi PROPERTIES PREFIX "" SUFFIX ".node")
+target_link_libraries(agmpc_matcher_napi ${CMAKE_JS_LIB} agmpc_matcher)
 
 # AGMPC single attribute executable
-add_executable(agmpc_singleatt_auction_main "src/mpc_addon/agmpc_singleatt_auction_main.cc")
-target_link_libraries(agmpc_singleatt_auction_main agmpc_singleatt_auction)
-target_include_directories(agmpc_singleatt_auction_main PUBLIC "src/mpc_addon")
+add_executable(agmpc_matcher_main "src/mpc_addon/agmpc_matcher_main.cc")
+target_link_libraries(agmpc_matcher_main agmpc_matcher)
+target_include_directories(agmpc_matcher_main PUBLIC "src/mpc_addon")
 
 # AGMPC single attribute circuit generation
-add_executable(agmpc_singleatt_circuit_generator "src/mpc_addon/agmpc_singleatt_circuit_generator.cc")
-target_link_libraries(agmpc_singleatt_circuit_generator ${EMP-TOOL_LIBRARIES})
-target_include_directories(agmpc_singleatt_circuit_generator PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")
+add_executable(agmpc_matcher_circuit_generator "src/mpc_addon/agmpc_matcher_circuit_generator.cc")
+target_link_libraries(agmpc_matcher_circuit_generator ${EMP-TOOL_LIBRARIES})
+target_include_directories(agmpc_matcher_circuit_generator PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")
 
 add_custom_target(agmpc_generate_circuits
-  ./agmpc_singleatt_circuit_generator 10
-  DEPENDS agmpc_singleatt_circuit_generator
+  ./agmpc_matcher_circuit_generator 10
+  DEPENDS agmpc_matcher_circuit_generator
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/build/bin"
 )
-add_dependencies(agmpc_singleatt_auction agmpc_generate_circuits)
-add_dependencies(agmpc_singleatt_auction_main agmpc_generate_circuits)
-add_dependencies(agmpc_singleatt_auction_napi agmpc_generate_circuits)
+add_dependencies(agmpc_matcher agmpc_generate_circuits)
+add_dependencies(agmpc_matcher_main agmpc_generate_circuits)
+add_dependencies(agmpc_matcher_napi agmpc_generate_circuits)

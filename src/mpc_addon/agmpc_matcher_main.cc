@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <agmpc_singleatt_auction.h>
+#include <agmpc_matcher.h>
 #include <jlog.h>
 
 #include <emp-agmpc/cmpc_config.h>
@@ -18,7 +18,7 @@ static const string outputDir = "/tmp/";
 
 int main(int argc, char** argv) {
     if (argc < 4 || argc > 6) {
-        error("Usage: agmpc_singleatt_auction <ipaddr filepath> <output filepath> <party index> [bob_bid] [ms_logging]\n");
+        error("Usage: agmpc_matcher_auction <ipaddr filepath> <output filepath> <party index> [bob_bid] [ms_logging]\n");
     }
     std::string ipFilePath = string(argv[1]);
     std::string outputFilePath = string(argv[2]);
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    auto res = agmpc_singleatt_auction(ip_list, party_index, bid);
+    auto res = agmpc_matcher(ip_list, party_index, bid);
     double t2 = time_from(start);
 
     ofstream outputfs;

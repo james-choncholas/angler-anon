@@ -1,7 +1,7 @@
 {
-  "name": "akridex-discovery",
-  "version": "1.0.16",
-  "description": "Discovery for multiparty resource allocation.",
+  "name": "akridex",
+  "version": "1.0.1",
+  "description": "Dark pool resource allocation",
   "author": {
     "name": "James Choncholas",
     "email": "jchoncholas3@gatech.edu",
@@ -36,7 +36,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "todo"
+    "url": "https://github.com/akridex/akridex"
   },
   "license": "ISC"
 }

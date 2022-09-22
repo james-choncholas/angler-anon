@@ -1,4 +1,4 @@
-#include <agmpc_singleatt_auction.h>
+#include <agmpc_matcher.h>
 
 #include <iostream>
 
@@ -142,11 +142,11 @@ void printCounters(NetIOMP * ios[2], string prefix, int party_index) {
 
 //void bench_once(NetIOMP * ios[2], ThreadPool * pool, string cffp, string outputfp) {
 std::optional<AuctionResult>
-agmpc_singleatt_auction(const std::vector<IpPort> &ip_list, int party_index, int bid) {
+agmpc_matcher(const std::vector<IpPort> &ip_list, int party_index, int bid) {
   const int nP = ip_list.size();
 
     std::string circuitDir = CIRCUIT_DIR;
-    std::string circuitPath = circuitDir + "/agmpc_singleatt_" + to_string(nP) + "_circuit.txt";
+    std::string circuitPath = circuitDir + "/agmpc_matcher_" + to_string(nP) + "_circuit.txt";
 
     ThreadPool pool(2*(nP-1)+2);
     NetIOMP io(ip_list, party_index, &pool);

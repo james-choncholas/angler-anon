@@ -1,6 +1,6 @@
 #include <napi.h>
 
-#include <agmpc_singleatt_auction.h>
+#include <agmpc_matcher.h>
 #include <emp-agmpc/cmpc_config.h>
 
 #include <jlog.h>
@@ -63,8 +63,8 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
     }
   }
 
-  cout << "Running agmpc_singleatt_auction...\n";
-  auto res = agmpc_singleatt_auction(ip_list, party_index, bid);
+  cout << "Running agmpc_matcher...\n";
+  auto res = agmpc_matcher(ip_list, party_index, bid);
   double t2 = time_from(start);
   cout << "...done\n";
 
@@ -76,9 +76,9 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
 }
 
 static Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports.Set(Napi::String::New(env, "agmpc_singleatt_auction_napi"),
+  exports.Set(Napi::String::New(env, "agmpc_matcher_napi"),
               Napi::Function::New(env, Method));
   return exports;
 }
 
-NODE_API_MODULE(agmpc_singleatt_auction_napi, Init)
+NODE_API_MODULE(agmpc_matcher_napi, Init)

@@ -7,4 +7,4 @@ struct AuctionResult {
 };
 
 std::optional<AuctionResult>
-agmpc_singleatt_auction(const std::vector<IpPort> &ip_list, int party_index, int bid=0);
+agmpc_matcher(const std::vector<IpPort> &ip_list, int party_index, int bid=0);
