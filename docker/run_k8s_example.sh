@@ -51,6 +51,7 @@ echo "starting bootstrap"
 sudo docker run -d --rm \
     --name bootstrap \
     --net=host \
+    --env DHT_BOOTSTRAP="localhost" \
     akridex:latest \
     node src/bootstrap_dht.js 20000
 
@@ -58,6 +59,7 @@ echo "starting passive dht nodes"
 sudo docker run -d --rm \
     --name passive \
     --net=host \
+    --env DHT_BOOTSTRAP="localhost" \
     akridex:latest \
     node src/passive_dht.js 10000 ${PASSIVE_DHT_NUM_NODES}
 
@@ -69,6 +71,7 @@ for party in $(seq 2 ${NUM_PARTIES}); do
         --name bob${party} \
         --net=host \
         -v $HOME/.kube:/root/.kube \
+        --env DHT_BOOTSTRAP="localhost" \
         akridex:latest \
         node src/bob_seed_dht.js $((30000 + 100*${party})) $LOC_HASH $LOOKUP_HASH
 done
@@ -80,6 +83,7 @@ sudo docker run -it --rm \
     --name alice \
     --net=host \
     -v $scriptpath/openssl:/akridex-discovery/openssl \
+    --env DHT_BOOTSTRAP="localhost" \
     --env TIME="SeNtInAl,3dbar,bash,walltime,$NUM_PARTIES,0,%E
 SeNtInAl,3dbar,bash,kerntime,$NUM_PARTIES,0,%S
 SeNtInAl,3dbar,bash,usrtime,$NUM_PARTIES,0,%U
