@@ -61,7 +61,7 @@ message(STATUS "NODE_ADDON_API_DIR is ${NODE_ADDON_API_DIR}")
 add_definitions(-DNAPI_VERSION=3)
 #include_directories(${CMAKE_JS_INC} "${NODE_ADDON_API_DIR}")
 
-# AGMPC single attribute lib
+# AGMPC matcher lib
 add_library(agmpc_matcher SHARED ${AGMPC_SINGLEATT_SOURCES})
 target_link_libraries(agmpc_matcher ${EMP-TOOL_LIBRARIES})
 target_include_directories(agmpc_matcher PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")
@@ -74,12 +74,12 @@ target_include_directories(agmpc_matcher_napi PUBLIC ${CMAKE_JS_INC} ${NODE_ADDO
 set_target_properties(agmpc_matcher_napi PROPERTIES PREFIX "" SUFFIX ".node")
 target_link_libraries(agmpc_matcher_napi ${CMAKE_JS_LIB} agmpc_matcher)
 
-# AGMPC single attribute executable
+# AGMPC matcher executable
 add_executable(agmpc_matcher_main "src/mpc_addon/agmpc_matcher_main.cc")
 target_link_libraries(agmpc_matcher_main agmpc_matcher)
 target_include_directories(agmpc_matcher_main PUBLIC "src/mpc_addon")
 
-# AGMPC single attribute circuit generation
+# AGMPC matcher circuit generation
 add_executable(agmpc_matcher_circuit_generator "src/mpc_addon/agmpc_matcher_circuit_generator.cc")
 target_link_libraries(agmpc_matcher_circuit_generator ${EMP-TOOL_LIBRARIES})
 target_include_directories(agmpc_matcher_circuit_generator PUBLIC ${EMP_INCLUDE_DIRS} "src/mpc_addon")

@@ -7,4 +7,4 @@ struct AuctionResult {
 };
 
 std::optional<AuctionResult>
-agmpc_matcher(const std::vector<IpPort> &ip_list, int party_index, int bid=0);
+agmpc_matcher(const std::vector<IpPort> &ip_list, int party_index, int capacity, int bid=0);

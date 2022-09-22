@@ -1,4 +1,4 @@
-const binding = require('bindings')('agmpc_singleatt_auction_napi');
+const binding = require('bindings')('agmpc_matcher_napi');
 const { Worker, workerData, parentPort } = require('worker_threads')
 //var async = require("async")
 
@@ -37,7 +37,8 @@ async function run() {
 if (workerData) {
   const party = parseInt(workerData[0]);
   const bid = parseInt(workerData[1]);
-  const res = binding.agmpc_singleatt_auction_napi(ips, ports, party, bid, 0);
+  const capacity = bid*2;
+  const res = binding.agmpc_matcher_napi(ips, ports, party, capacity, bid, 0);
   parentPort.postMessage(res);
 } else {
   run().catch(err => console.error(err))

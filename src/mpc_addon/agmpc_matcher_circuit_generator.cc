@@ -52,9 +52,13 @@ int main(int argc, char** argv) {
       emp::setup_plain_prot(true, circuitPath.c_str());
 
       // no public wires in agmpc, alice must supply
+      Integer globalMinIndex(32, 0, ALICE);
+      Integer globalMinCost(32, INT_MAX, ALICE);
+      Integer curIndex(32, 2, ALICE); // 0=none, 1=alice, 2=first bob
+      Integer one(32, 1, ALICE);
       Integer request_sz(32, 0, ALICE);
-      Integer zero(32, 0, ALICE);
-      Integer inf(32, 0, ALICE);
+      //Integer zero(32, 0, ALICE);
+      //Integer inf(32, 0, ALICE);
 
       num_providers = num_parties-1;
 
@@ -88,20 +92,16 @@ int main(int argc, char** argv) {
 
       //// First price auction checks capacity
       // 10pc -> 1440 AND gates
-      //Integer globalMinIndex(32, 0, ALICE);
-      //Integer globalMinCost(32, INT_MAX, ALICE);
-      //Integer curIndex(32, 2, ALICE); // 0=none, 1=alice, 2=first bob
-      //Integer one(32, 1, ALICE);
-      //for (int p=0; p < db.size(); ++p) {
-      //  Bit is_under_capacity = request_sz < db[p].capacity;
-      //  Bit is_min_price = db[p].price < globalMinCost;
-      //  Bit best_choice = is_under_capacity & is_min_price;
-      //  globalMinCost = globalMinCost.If(best_choice, db[p].price);
-      //  globalMinIndex = globalMinIndex.If(best_choice, curIndex);
-      //  curIndex = curIndex + one;
-      //}
-      //globalMinCost.reveal<int>();
-      //globalMinIndex.reveal<int>();
+      for (int p=0; p < db.size(); ++p) {
+        Bit is_under_capacity = request_sz < db[p].capacity;
+        Bit is_min_price = db[p].price < globalMinCost;
+        Bit best_choice = is_under_capacity & is_min_price;
+        globalMinCost = globalMinCost.If(best_choice, db[p].price);
+        globalMinIndex = globalMinIndex.If(best_choice, curIndex);
+        curIndex = curIndex + one;
+      }
+      globalMinCost.reveal<int>();
+      globalMinIndex.reveal<int>();
 
 
       //// First price auction for each unit in request

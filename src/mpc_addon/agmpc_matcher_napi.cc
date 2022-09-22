@@ -5,11 +5,11 @@
 
 #include <jlog.h>
 
-// args: ip_array, port_array, party_index (1 indexed), [bob_bid], [ms_for_logging]
+// args: ip_array, port_array, party_index (1 indexed), capacity, [bid], [ms_for_logging]
 static Napi::Array Method(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
-  if (info.Length() < 3 || info.Length() > 5) {
+  if (info.Length() < 4 || info.Length() > 6) {
     Napi::TypeError::New(env, "Wrong number of arguments")
         .ThrowAsJavaScriptException();
     return Napi::Array(env, NULL);
@@ -47,24 +47,27 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
     return Napi::Array(env, NULL);
   }
 
+  uint32_t capacity = info[3].As<Napi::Number>().Uint32Value();
+  cout << "Capacity: " << capacity << '\n';
+
   int bid=0, msLogger=0;
   if (party_index > 1) {
-    if (info.Length() <= 3) {
+    if (info.Length() <= 4) {
       Napi::TypeError::New(env, "bob needs to supply input bid")
           .ThrowAsJavaScriptException();
     return Napi::Array(env, NULL);
     } else {
-      bid = info[3].As<Napi::Number>().Int32Value();
+      bid = info[4].As<Napi::Number>().Int32Value();
       cout << "Bid: " << bid << '\n';
     }
-    if (info.Length() > 4) {
-      msLogger = info[4].As<Napi::Number>().Int32Value();
+    if (info.Length() > 5) {
+      msLogger = info[5].As<Napi::Number>().Int32Value();
       cout << "Logging ms: " << msLogger << '\n';
     }
   }
 
   cout << "Running agmpc_matcher...\n";
-  auto res = agmpc_matcher(ip_list, party_index, bid);
+  auto res = agmpc_matcher(ip_list, party_index, capacity, bid);
   double t2 = time_from(start);
   cout << "...done\n";
 
