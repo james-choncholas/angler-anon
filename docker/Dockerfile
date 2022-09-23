@@ -1,9 +1,7 @@
-#FROM ubuntu:18.04
 FROM ubuntu:20.04
 
 SHELL ["/bin/bash", "-c"]
 
-# Extras for testing
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
     time \
     tzdata \
@@ -17,7 +15,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install 
     && rm -rf /var/lib/apt/lists/*
     #linux-tools-5.4.0-54-generic \
 
-#ENV NVM_DIR ~/.nvm
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION "v17.0.1"
 
@@ -28,12 +25,13 @@ RUN mkdir -p $NVM_DIR && cd $NVM_DIR && \
     nvm install $NODE_VERSION && \
     nvm alias default $NODE_VERSION && \
     nvm use default
-    #source $NVM_DIR/install.sh && \
 
 ENV NODE_PATH $NVM_DIR/$NODE_VERSION/lib/node_modules
 ENV PATH $NVM_DIR/versions/node/$NODE_VERSION/bin:$PATH
+ENV OPENSSL_PATH /akridex/openssl
 
 WORKDIR /akridex
+RUN mkdir $OPENSSL_PATH
 
 COPY . .
 

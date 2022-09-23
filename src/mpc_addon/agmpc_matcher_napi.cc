@@ -6,13 +6,14 @@
 #include <jlog.h>
 
 // args: ip_array, port_array, party_index (1 indexed), capacity, [bid], [ms_for_logging]
-static Napi::Array Method(const Napi::CallbackInfo& info) {
+static Napi::TypedArrayOf<uint32_t> Method(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
+  auto napi_res = Napi::Uint32Array::New(env, 2);
   if (info.Length() < 4 || info.Length() > 6) {
     Napi::TypeError::New(env, "Wrong number of arguments")
         .ThrowAsJavaScriptException();
-    return Napi::Array(env, NULL);
+    return napi_res;
   }
 
   auto start = clock_start();
@@ -23,11 +24,11 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
   if (ips.Length() != ports.Length()) {
     Napi::TypeError::New(env, "IP and ports length do not match")
         .ThrowAsJavaScriptException();
-    return Napi::Array(env, NULL);
+    return napi_res;
   }
-  int nP = ips.Length();
+  uint32_t nP = ips.Length();
   ip_list.reserve(nP);
-  for (auto i = 0; i < nP; i++) {
+  for (uint32_t i = 0; i < nP; i++) {
     ip_list.push_back({
           static_cast<Napi::Value>(ips[i]).ToString().Utf8Value(),
           static_cast<Napi::Value>(ports[i]).As<Napi::Number>().Int32Value()
@@ -35,7 +36,7 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
   }
 
   cout << "Participants:\n";
-  for (int i = 0; i < nP; i++) {
+  for (uint32_t i = 0; i < nP; i++) {
     cout << '\t' << ip_list[i].Ip << ":" << ip_list[i].port << '\n';
   }
 
@@ -44,7 +45,7 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
   if (party_index > nP) {
     Napi::TypeError::New(env, "party_index out of range")
         .ThrowAsJavaScriptException();
-    return Napi::Array(env, NULL);
+    return napi_res;
   }
 
   uint32_t capacity = info[3].As<Napi::Number>().Uint32Value();
@@ -55,7 +56,7 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
     if (info.Length() <= 4) {
       Napi::TypeError::New(env, "bob needs to supply input bid")
           .ThrowAsJavaScriptException();
-    return Napi::Array(env, NULL);
+      return napi_res;
     } else {
       bid = info[4].As<Napi::Number>().Int32Value();
       cout << "Bid: " << bid << '\n';
@@ -74,8 +75,9 @@ static Napi::Array Method(const Napi::CallbackInfo& info) {
   MSG("SeNtInAl,3dbar,%s,%s,%d,%d,%.0f\n", __FUNCTION__, "e2e-mpc", nP, msLogger, t2);
   cout << "Winning party: " << res->WinningParty << '\n';
   cout << "Winning bid: " << res->WinningBid << '\n';
-  //return Napi::Uint32Array(res->WinningParty, res->WinningBid);
-  return Napi::Array(env, NULL);
+  napi_res[0] = res->WinningParty;
+  napi_res[1] = res->WinningBid;
+  return napi_res;
 }
 
 static Napi::Object Init(Napi::Env env, Napi::Object exports) {

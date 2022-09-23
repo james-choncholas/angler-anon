@@ -46,6 +46,9 @@ if (workerData) {
     capacity = bid*2;
   }
   const res = binding.agmpc_matcher_napi(ips, ports, party, capacity, bid, 0);
+  const winningParty = res[0];
+  const winningBid = res[1];
+  console.log(`JS got result: ${winningParty} ${winningBid}`)
   parentPort.postMessage(res);
 } else {
   run().catch(err => console.error(err))

@@ -20,9 +20,10 @@ scriptpath="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # resources in the cluster.
 
 
-NUM_PARTIES=10
+NUM_PARTIES=3
 PASSIVE_DHT_NUM_NODES=10
 LOC_HASH=dn5bpsbw
+DHT_BOOTSTRAP_PORT=20000
 # room hash without LOC_HASH (cpu: 200m memory: 128Mi)
 LOOKUP_HASH=7d24eab233ed084b97ea2ae59865e6e838c0108b
 # room hash including LOC_HASH prefix
@@ -54,26 +55,32 @@ echo "starting bootstrap"
 sudo docker run -d --rm \
     --name bootstrap \
     --net=host \
+    --env DHT_BOOTSTRAP_HOST="localhost" \
+    --env DHT_BOOTSTRAP_PORT=$DHT_BOOTSTRAP_PORT \
     akridex:latest \
-    node src/bootstrap_dht.js 20000
+    node src/bootstrap_dht.js $DHT_BOOTSTRAP_PORT
 
 echo "starting passive dht nodes"
 sudo docker run -d --rm \
     --name passive \
     --net=host \
+    --env DHT_BOOTSTRAP_HOST="localhost" \
+    --env DHT_BOOTSTRAP_PORT=$DHT_BOOTSTRAP_PORT \
     akridex:latest \
     node src/passive_dht.js 10000 ${PASSIVE_DHT_NUM_NODES}
 
 sleep 10 # let k8s generate certs
 
-for party in $(seq 3 ${NUM_PARTIES}); do
+for party in $(seq 2 ${NUM_PARTIES}); do
     echo "starting bob $party"
     sudo docker run -d --rm \
-        --name bob${party} \
-        --net=host \
-        -v $HOME/.kube:/root/.kube \
-        akridex:latest \
-        node src/bob_seed_dht.js $((30000 + 100*${party})) $LOC_HASH $LOOKUP_HASH
+      --name bob${party} \
+      --net=host \
+      -v $HOME/.kube:/root/.kube \
+      --env DHT_BOOTSTRAP_HOST="localhost" \
+      --env DHT_BOOTSTRAP_PORT=$DHT_BOOTSTRAP_PORT \
+      akridex:latest \
+      node src/bob_seed_dht.js $((30000 + 100*${party})) $LOC_HASH $LOOKUP_HASH
 done
 
 sleep 5 # let providers start up
@@ -89,7 +96,8 @@ echo "starting alice"
 sudo docker run -it --rm \
     --name alice \
     --net=host \
-    -v $scriptpath/openssl:/akridex-discovery/openssl \
+    --env DHT_BOOTSTRAP_HOST="localhost" \
+    --env DHT_BOOTSTRAP_PORT=$DHT_BOOTSTRAP_PORT \
     --env TIME="SeNtInAl,3dbar,bash,walltime,$NUM_PARTIES,0,%E
 SeNtInAl,3dbar,bash,kerntime,$NUM_PARTIES,0,%S
 SeNtInAl,3dbar,bash,usrtime,$NUM_PARTIES,0,%U

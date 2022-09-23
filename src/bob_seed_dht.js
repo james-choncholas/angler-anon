@@ -15,6 +15,7 @@ const simpleSha1 = require('simple-sha1') // in dht
 const HashMap = require('hashmap');
 const Parser = require('expr-eval').Parser;
 const myenv = require('./env.js')
+const binding = require('bindings')('agmpc_matcher_napi');
 
 StateEnum = Object.freeze({"Ready":1, "NamespaceCreated":2, "MakeUserToo":3, "FullyProvisioned":4})
 
@@ -462,23 +463,10 @@ class Bob {
 
         var hrstart = process.hrtime()
 
-        var ipFilePath = `${__dirname}/${myenv.circuit_dir}/ipaddrs-${token}.txt`
-        var outputFilePath = `${myenv.output_dir}/output-${token}-${myIndex}.txt`
-
-        var fd = fs.openSync(ipFilePath, 'w');
-        for (var i=0; i<parties.length; i++) {
-            var party = parties[i]
-            var partyHost = party.split(':')[0]
-            var partyDhtPort = party.split(':')[1]
-            var partyMpcPort = parseInt(partyDhtPort) + 2
-            fs.writeSync(fd, `${partyHost}:${partyMpcPort}\n`)
-        }
-        fs.closeSync(fd, 'w');
-
         var myIndex = parties.indexOf(this.myHostAndPort) + 1 // 1 indexed :(
         if (myIndex == 0) {
             console.log(`cant find myself (${this.myHostAndPort}) in list of MPC participants`)
-            console.log('trying local ip...')
+            console.log('trying looking for localhost...')
             myIndex = parties.indexOf(`${Ip.address()}:${this.dhtPort}`) + 1 // 1 indexed :(
             if (myIndex == 0) {
                 console.log(`cant find myself (${Ip.address()}:${this.dhtPort}) in list of MPC participants`)
@@ -494,59 +482,23 @@ class Bob {
             }
         }
 
-        var mpcBin = `${__dirname}/${myenv.circuit_dir}/${myenv.circuit_prefix}_${parties.length}_auction`;
-        console.log(mpcBin)
-
-        var child = spawn(mpcBin, [ipFilePath, outputFilePath, myIndex, bid, '0'], { detached: false, stdio: 'inherit' })
-        child.on('close', (code) => {
-            if (code) {
-                console.log('mpc returned error')
-                this.shutdown(this.onErr(token))
-                return
-            }
-
-            console.log('mpc finished!')
-            fs.readFile(outputFilePath, {encoding: 'utf8'}, (err,data) => {
-                if(err) {
-                    console.log(`failure reading output ${party}`.red);
-                    console.log(error);
-                    return;
-                }
-                var ds = data.toString()
-                console.log(ds);
-                var winnerIndex = ds.split(' ')[0]
-                var winnerPrice = ds.split(' ')[1]
-
-                var hrend = process.hrtime(hrstart)
-                console.log(`SeNtInAl,xy,nodejs,run_mpc_bob,${parties.length},${hrend[0]+(hrend[1]/1e9)}`)
-
-                if (myIndex == winnerIndex && !myenv.skipProvisioning) {
-                    console.log('winner!'.green)
-
-                    var customer = this.customerMap.get(token)
-                    var crdDef = this.crdMap.get(customer.crdHash)
-                    crdDef.secretQuantityRemaining --;
-
-                    if (customer.state == StateEnum.Ready || customer.state == StateEnum.MakeUserToo) {
-                        this.provisionNamespace(token, parties, winnerIndex, winnerPrice)
-                    } else {
-                        console.log('unknown state after mpc')
-                    }
-                } else {
-                    // If MPC ended without an output file - causes bob to use old execution and think he didn't win
-                    // when he actually did. Then csr request hangs. Send it here.
-                    var customer = this.customerMap.get(token)
-                    if (customer !== undefined && customer.csrRes !== undefined) {
-                        customer.csrRes.json({
-                            kubeconfig: 'fail'
-                        })
-                    }
-                    this.customerMap.delete(token)
-                }
-            });
-        });
-
-        setTimeout(() => { child.kill('SIGKILL')}, 30000);
+        const ips = [];
+        const ports = [];
+        for (var i=0; i<parties.length; i++) {
+            const partyIpDhtport = parties[i].split(':')
+            ips.push(partyIpDhtport[0])
+            ports.push(parseInt(partyIpDhtport[1])+2) // mpc port is offset by 2
+        }
+        const capacity = crdDef.secretQuantityRemaining;
+        console.log(`capacity: ${capacity}`)
+        const res = binding.agmpc_matcher_napi(ips, ports, myIndex, parseInt(capacity), parseInt(bid));
+        const winnerIndex = res[0];
+        const winnerPrice = res[1];
+        if (!winnerIndex || !winnerPrice) {
+            console.log('mpc failed')
+            setTimeout(this.shutdown.bind(this, this.onErr), 30000)
+            return
+        }
     }
 
     listen(cb) {
@@ -606,7 +558,7 @@ module.exports = Bob
 if (require.main === module) {
     var cmdargs = process.argv.slice(2)
     if (cmdargs.length != 3) {
-        console.log("Usage: " + process.argv[0] + process.argv[1] + " <port> <geohash prefix> <seed infohash>")
+        console.log("Usage: " + process.argv[0] + process.argv[1] + " <port> <dht prefix> <seed infohash>")
         process.exit(1);
     }
 
@@ -624,7 +576,7 @@ if (require.main === module) {
 
             bob.listen( () => {
                 var myInfoHash = myenv.prefixGeohash(cmdargs[1], cmdargs[2]).toString('hex')
-                bob.defineCrd(myInfoHash, '200m', '128Mi', '-1', '-q-r+2')
+                bob.defineCrd(myInfoHash, '200m', '128Mi', Math.floor(Math.random() * 8)+2, '(2*(q-r))+2')
                 for (var i=0; i<20; i++) {
                     setTimeout(() => { bob.seed(myInfoHash)}, i*1000)
                 }

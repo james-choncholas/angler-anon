@@ -12,8 +12,9 @@ const randombytes = require('randombytes') // in dht
 const simpleSha1 = require('simple-sha1') // in dht
 const tcpp = require('tcp-ping');
 const myenv = require('./env.js')
+const binding = require('bindings')('agmpc_matcher_napi');
 
-const csrPath = `${__dirname}/openssl`;
+const csrPath = process.env.OPENSSL_PATH ? process.env.OPENSSL_PATH : `${__dirname}/openssl`
 
 class Alice {
     constructor (opts = {}) {
@@ -210,65 +211,34 @@ class Alice {
     async runMPC(token, parties) {
         var hrstart = process.hrtime()
 
-        var ipFilePath = `${__dirname}/${myenv.circuit_dir}/ipaddrs-${token}.txt`
-        var fd = fs.openSync(ipFilePath, 'w');
+        const ips = [];
+        const ports = [];
         for (var i=0; i<parties.length; i++) {
-            var party = parties[i]
-            var partyHost = party.split(':')[0]
-            var partyDhtPort = party.split(':')[1]
-            var partyMpcPort = parseInt(partyDhtPort) + 2
-            fs.writeSync(fd, `${partyHost}:${partyMpcPort}\n`)
+            const partyIpDhtport = parties[i].split(':')
+            ips.push(partyIpDhtport[0])
+            ports.push(parseInt(partyIpDhtport[1])+2) // mpc port is offset by 2
         }
-        fs.closeSync(fd, 'w');
+        const requesterPartyNum = 1;
+        const capacity = 5;
+        const bid = 0; //ignored
+        const res = binding.agmpc_matcher_napi(ips, ports, requesterPartyNum, capacity, bid, this.msdelay);
+        const winnerIndex = res[0];
+        const winnerPrice = res[1];
+        if (!winnerIndex || !winnerPrice) {
+            console.log('mpc failed with no output file')
+            setTimeout(this.shutdown.bind(this, this.onErr), 30000)
+            return
+        }
 
         var hrend = process.hrtime(hrstart)
+        console.log(`SeNtInAl,3dbar,nodejs,run_mpc,${this.totalPeerCount},${this.msdelay},${hrend[0]+(hrend[1]/1e9)}`)
 
-        var mpcBin = `${__dirname}/${myenv.circuit_dir}/${myenv.circuit_prefix}_${parties.length}_auction`;
-        console.log(mpcBin)
-
-        var outputFilePath = `${myenv.output_dir}/output-${token}-1.txt`
-
-        // pass alice index (always 1), dummy bid of 0 (placeholder), ms (for logging)
-        var child = spawn(mpcBin, [ipFilePath, outputFilePath, '1', '0', this.msdelay], { detached: false, stdio: 'inherit' })
-        child.on('close', (code) => {
-            if (code) {
-                console.log('mpc returned error')
-                this.shutdown(this.onErr)
-                return
-            }
-            console.log('mpc finished!')
-
-            fs.readFile(outputFilePath, {encoding: 'utf8'}, (err,data) => {
-                if(err) {
-                    console.log(`failure reading output ${party}`);
-                    console.log(error);
-                    this.shutdown(this.onErr)
-                    return
-                }
-                var ds = data.toString()
-                console.log(ds);
-                var winnerIndex = ds.split(' ')[0]
-                var winnerPrice = ds.split(' ')[1]
-
-                if (!winnerIndex || !winnerPrice) {
-                    console.log('mpc failed with no output file')
-                    setTimeout(this.shutdown.bind(this, this.onErr), 30000)
-                    return
-                }
-
-                var hrend = process.hrtime(hrstart)
-                console.log(`SeNtInAl,3dbar,nodejs,run_mpc,${this.totalPeerCount},${this.msdelay},${hrend[0]+(hrend[1]/1e9)}`)
-
-                if (myenv.skipProvisioning) {
-                    setTimeout(this.shutdown.bind(this, this.onSuc), 500)
-                    return
-                } else {
-                    this.sendCsr(token, parties, winnerIndex, winnerPrice)
-                }
-            });
-        });
-
-        setTimeout(function(){ child.kill('SIGKILL')}, 30000);
+        if (myenv.skipProvisioning) {
+            setTimeout(this.shutdown.bind(this, this.onSuc), 500)
+            return
+        } else {
+            this.sendCsr(token, parties, winnerIndex, winnerPrice)
+        }
     }
 
     async setupMPC(token, crdHash, parties) {
@@ -390,6 +360,7 @@ class Alice {
                     return
                 } else if (this.peers.length > 1) {
                     if (this.peersContacted < 10) {
+                        console.log(`only contacted ${this.peersContacted}, something must be wrong`)
                         console.log(`SeNtInAl,3dbar,nodejs,failed_dht_lookup,${this.totalPeerCount},${this.msdelay},${hrend[0]+(hrend[1]/1e9)}`)
                         console.log(`SeNtInAl,barbox,nodejs,failed_dht_contacted,${this.totalPeerCount},${this.peersContacted}`)
                         console.log(`SeNtInAl,barbox,nodejs,failed_dht_visited,${this.totalPeerCount},${numNodesWPeers}`)
